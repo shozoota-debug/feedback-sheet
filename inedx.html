@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>フィードバック面談シート｜仁生会</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1e4f8f;--blue2:#2b6cb0;--blue-lt:#ebf4ff;
+  --green:#276749;--green-lt:#f0fff4;
+  --red:#c53030;--red-lt:#fff5f5;
+  --gray:#f7fafc;--border:#e2e8f0;--text:#2d3748;--sub:#718096;
+  --s:#6b46c1;--a:#2b6cb0;--b:#38a169;--c:#d69e2e;--d:#c53030;
+}
+body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',Arial,sans-serif;background:#eef2f7;color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hdr-title{font-size:15px;font-weight:700;letter-spacing:.3px}
+.hdr-sub{font-size:11px;opacity:.8;margin-top:2px}
+.tabs{display:flex;gap:4px}
+.tab{padding:7px 16px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:rgba(255,255,255,.18);color:#fff;transition:.15s}
+.tab.on{background:#fff;color:var(--blue)}
+.tab:hover:not(.on){background:rgba(255,255,255,.28)}
+
+/* ── PAGES ── */
+.page{display:none}.page.on{display:block}
+.wrap{max-width:860px;margin:24px auto;padding:0 14px}
+
+/* ── AUTH ── */
+.auth-card{background:#fff;border-radius:14px;padding:40px;max-width:400px;margin:60px auto;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center}
+.auth-card h2{font-size:17px;color:var(--blue);margin-bottom:6px}
+.auth-card p{font-size:12px;color:var(--sub);margin-bottom:24px}
+.auth-badge{font-size:40px;margin-bottom:16px}
+
+/* ── CARD ── */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:24px;margin-bottom:18px}
+.card-ttl{font-size:13px;font-weight:700;color:var(--blue);border-left:4px solid var(--blue2);padding-left:10px;margin-bottom:18px}
+
+/* ── FORM ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+label{font-size:11px;font-weight:700;color:var(--sub)}
+label .req{color:var(--red);margin-left:2px}
+input,select,textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:100%;transition:.15s;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue2);box-shadow:0 0 0 3px rgba(43,108,176,.12)}
+textarea{resize:vertical;min-height:78px;line-height:1.6}
+
+/* ── RANK BTNS ── */
+.rbg{display:flex;gap:7px;flex-wrap:wrap}
+.rb{padding:8px 18px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-weight:800;font-size:14px;background:#fff;transition:.15s;font-family:inherit}
+.rb:hover{border-color:var(--blue2)}
+.rb.on[data-r="S"]{background:var(--s);color:#fff;border-color:var(--s)}
+.rb.on[data-r="A"]{background:var(--a);color:#fff;border-color:var(--a)}
+.rb.on[data-r="B"]{background:var(--b);color:#fff;border-color:var(--b)}
+.rb.on[data-r="C"]{background:var(--c);color:#fff;border-color:var(--c)}
+.rb.on[data-r="D"]{background:var(--d);color:#fff;border-color:var(--d)}
+
+/* ── PERIOD BTNs ── */
+.pbg{display:flex;gap:7px;flex-wrap:wrap}
+.pb{padding:7px 16px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;background:#fff;transition:.15s;font-family:inherit}
+.pb.on{background:var(--blue2);color:#fff;border-color:var(--blue2)}
+
+/* ── ACTIONS ── */
+.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
+.btn{padding:10px 22px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:.15s;font-family:inherit}
+.btn-primary{background:var(--blue2);color:#fff}.btn-primary:hover{background:var(--blue)}
+.btn-success{background:#38a169;color:#fff}.btn-success:hover{background:var(--green)}
+.btn-outline{background:#fff;color:var(--blue2);border:2px solid var(--blue2)}.btn-outline:hover{background:var(--blue-lt)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#9b2c2c}
+.btn-sm{padding:5px 12px;font-size:11px}
+
+/* ── ALERT ── */
+.alert{padding:12px 16px;border-radius:8px;font-size:12px;font-weight:700;margin-bottom:14px}
+.alert-ok{background:var(--green-lt);color:var(--green);border:1px solid #9ae6b4}
+.alert-err{background:var(--red-lt);color:var(--red);border:1px solid #feb2b2}
+
+/* ── ADMIN ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:linear-gradient(135deg,var(--blue-lt),#bee3f8);border-radius:10px;padding:16px;text-align:center}
+.stat-n{font-size:30px;font-weight:800;color:var(--blue)}
+.stat-l{font-size:11px;color:var(--sub);margin-top:3px}
+.fbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.fbar .fg{min-width:120px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#edf2f7;padding:9px 10px;text-align:left;font-weight:700;color:var(--sub);position:sticky;top:0;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:var(--gray)}
+.twrap{overflow:auto;max-height:380px;border-radius:8px;border:1px solid var(--border)}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:800;color:#fff}
+.bS{background:var(--s)}.bA{background:var(--a)}.bB{background:var(--b)}.bC{background:var(--c)}.bD{background:var(--d)}
+.pi{font-size:11px;color:var(--sub);margin-top:7px}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cbox{background:var(--gray);border-radius:10px;padding:14px}
+.cbox-ttl{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px}
+canvas{max-height:210px}
+.empty{text-align:center;color:#a0aec0;padding:36px;font-size:13px}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:14px;padding:28px;max-width:580px;width:92%;max-height:82vh;overflow-y:auto;position:relative}
+.modal-x{position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub)}
+.dl{margin-top:10px}.dl dt{font-size:10px;color:var(--sub);margin-top:8px}.dl dd{font-size:13px;white-space:pre-wrap;color:var(--text)}
+
+/* ── HINT ── */
+.hint{background:#fffbeb;border:1px solid #f6e05e;border-radius:8px;padding:12px 16px;font-size:11px;color:#744210;margin-bottom:16px;line-height:1.6}
+
+@media(max-width:580px){
+  .grid,.charts{grid-template-columns:1fr}
+  .hdr-title{font-size:13px}
+  .tab{padding:6px 10px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div><div class="hdr-title">📋 フィードバック面談シート</div><div class="hdr-sub">社会医療法人仁生会</div></div>
+  <div class="tabs" id="tabs" style="display:none">
+    <button class="tab on" onclick="showPage('input')">入力フォーム</button>
+    <button class="tab" onclick="showPage('admin')">管理画面（人事部）</button>
+  </div>
+</div>
+
+<!-- ===== AUTH PAGE ===== -->
+<div class="page on" id="pg-auth">
+  <div class="auth-card">
+    <div class="auth-badge">🔐</div>
+    <h2>ログイン</h2>
+    <p>ご利用のパスワードを入力してください</p>
+    <div class="fg" style="margin-bottom:12px">
+      <label>パスワード</label>
+      <input type="password" id="pw-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doAuth()">
+    </div>
+    <div id="auth-err"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="doAuth()">ログイン</button>
+    <p style="font-size:10px;color:var(--sub);margin-top:16px">
+      ※ 入力者用: <b>staff2024</b>　管理者用: <b>admin2024</b>
+    </p>
+  </div>
+</div>
+
+<!-- ===== INPUT PAGE ===== -->
+<div class="page" id="pg-input">
+  <div class="wrap">
+    <div id="f-alert"></div>
+    <div class="hint">💡 入力完了後「<b>CSVで保存</b>」ボタンを押してファイルをダウンロードし、人事部へ提出してください。</div>
+
+    <div class="card">
+      <div class="card-ttl">基本情報</div>
+      <div class="grid">
+        <div class="fg"><label>記入日<span class="req">*</span></label><input type="date" id="f-date"></div>
+        <div class="fg"><label>対象年度<span class="req">*</span></label><input type="number" id="f-year" placeholder="例：2024" min="2020" max="2040"></div>
+        <div class="fg">
+          <label>対象期<span class="req">*</span></label>
+          <div class="pbg" id="pbg-period"></div><input type="hidden" id="f-period">
+        </div>
+        <div class="fg">
+          <label>評価種別<span class="req">*</span></label>
+          <div class="pbg" id="pbg-type"></div><input type="hidden" id="f-type">
+        </div>
+        <div class="fg"><label>部署名<span class="req">*</span></label><input type="text" id="f-dept" placeholder="例：看護部、リハビリ科"></div>
+        <div class="fg"><label>被評価者氏名<span class="req">*</span></label><input type="text" id="f-name" placeholder="氏名を入力"></div>
+        <div class="fg full"><label>面談者（上司）氏名<span class="req">*</span></label><input type="text" id="f-evaluator" placeholder="氏名を入力"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">1. 総合評価ランク</div>
+      <div class="grid">
+        <div class="fg"><label>行動評価ランク<span class="req">*</span></label><div class="rbg" id="rg-beh"></div><input type="hidden" id="f-rbeh"></div>
+        <div class="fg"><label>目標達成度評価ランク<span class="req">*</span></label><div class="rbg" id="rg-goal"></div><input type="hidden" id="f-rgoal"></div>
+        <div class="fg full"><label>総合ランク<span class="req">*</span></label><div class="rbg" id="rg-over"></div><input type="hidden" id="f-rover"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">2. フィードバック内容の要約</div>
+      <div class="grid">
+        <div class="fg full"><label>■ 自身の強み・高く評価された行動</label><textarea id="f-str" placeholder="例：〇〇の業務において、法人理念に沿った協調性のある動きができていた等"></textarea></div>
+        <div class="fg full"><label>■ 今後の改善点・不足していた視点</label><textarea id="f-imp" placeholder="例：目標達成に向けたプロセス管理、または特定の行動ステップの向上など"></textarea></div>
+        <div class="fg full"><label>■ 次期に向けた具体的な課題・期待される水準</label><textarea id="f-nxt" placeholder="例：次期は〇〇の項目でステップ〇を目指す、リーダーシップを発揮するなど"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">3. 確認事項・不明点の解消</div>
+      <div class="fg"><label>確認したい点・不明点</label><textarea id="f-q" placeholder="確認事項があれば記入してください"></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">4. 最終確認（署名）</div>
+      <div class="grid">
+        <div class="fg"><label>被評価者（本人）署名</label><input type="text" id="f-ss" placeholder="氏名を入力"></div>
+        <div class="fg"><label>評価者（上司）署名</label><input type="text" id="f-se" placeholder="氏名を入力"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-outline" onclick="clearForm()">リセット</button>
+      <button class="btn btn-success" onclick="saveCSV()">📥 CSVで保存（人事部へ提出）</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN PAGE ===== -->
+<div class="page" id="pg-admin">
+  <div class="wrap">
+    <div class="card">
+      <div class="card-ttl">📊 集計サマリー</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-n" id="st-tot">0</div><div class="stat-l">総件数</div></div>
+        <div class="stat"><div class="stat-n" id="st-dep">0</div><div class="stat-l">部署数</div></div>
+        <div class="stat"><div class="stat-n" id="st-s">0</div><div class="stat-l">S評価</div></div>
+        <div class="stat"><div class="stat-n" id="st-a">0</div><div class="stat-l">A評価</div></div>
+        <div class="stat"><div class="stat-n" id="st-yr">-</div><div class="stat-l">対象年度</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">📈 グラフ・統計</div>
+      <div class="charts">
+        <div class="cbox"><div class="cbox-ttl">総合ランク分布</div><canvas id="ch-rank"></canvas></div>
+        <div class="cbox"><div class="cbox-ttl">部署別件数 (上位10)</div><canvas id="ch-dept"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">📂 CSVインポート（人事部：回収ファイルを読み込む）</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input type="file" id="csv-import" accept=".csv" multiple style="font-size:12px">
+        <button class="btn btn-primary" onclick="importCSV()">📤 読み込む</button>
+        <button class="btn btn-red" onclick="clearAll()">🗑️ 全データ削除</button>
+      </div>
+      <div id="import-msg" style="margin-top:8px;font-size:12px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-ttl">🔍 一覧・検索・エクスポート</div>
+      <div class="fbar">
+        <div class="fg"><label>年度</label><input type="number" id="fil-yr" placeholder="例：2024"></div>
+        <div class="fg"><label>期</label><select id="fil-per"><option value="">すべて</option><option>上期</option><option>下期</option></select></div>
+        <div class="fg"><label>部署</label><input type="text" id="fil-dep" placeholder="部署名"></div>
+        <div class="fg"><label>総合ランク</label><select id="fil-rnk"><option value="">すべて</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+        <div class="fg"><label>氏名</label><input type="text" id="fil-nm" placeholder="被評価者名"></div>
+        <button class="btn btn-primary" style="align-self:flex-end" onclick="applyFilter()">🔍 検索</button>
+        <button class="btn btn-outline" style="align-self:flex-end" onclick="resetFilter()">リセット</button>
+      </div>
+      <div class="actions" style="justify-content:flex-start;margin-bottom:10px">
+        <button class="btn btn-success" onclick="exportCSV()">📥 CSVエクスポート</button>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead><tr><th>記入日</th><th>年度/期</th><th>部署</th><th>被評価者</th><th>面談者</th><th>行動</th><th>目標</th><th>総合</th><th>操作</th></tr></thead>
+          <tbody id="tbl"></tbody>
+        </table>
+      </div>
+      <div class="pi" id="pi"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const PW_STAFF  = 'staff2024';
+const PW_ADMIN  = 'admin2024';
+const SK = 'jsk_fb_v2';
+
+let role = '';
+let records = [];
+let filtered = [];
+let charts = {};
+
+// ── AUTH ──
+function doAuth(){
+  const pw = document.getElementById('pw-input').value;
+  if(pw === PW_STAFF){ role='staff'; loginOk(); }
+  else if(pw === PW_ADMIN){ role='admin'; loginOk(); }
+  else{ document.getElementById('auth-err').innerHTML='<div class="alert alert-err">パスワードが違います</div>'; }
+}
+function loginOk(){
+  loadRecords();
+  hide('pg-auth'); show('pg-input');
+  document.getElementById('tabs').style.display='flex';
+  if(role==='admin') showPage('admin');
+  else showPage('input');
+}
+
+// ── PAGE ──
+function showPage(p){
+  ['input','admin'].forEach(x=>{ document.getElementById('pg-'+x).classList.toggle('on', x===p); });
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',(p==='input'&&i===0)||(p==='admin'&&i===1)));
+  if(p==='admin'){ filtered=[...records]; renderAdmin(); }
+}
+function show(id){ document.getElementById(id).classList.add('on'); }
+function hide(id){ document.getElementById(id).classList.remove('on'); }
+
+// ── INIT ──
+(function(){
+  const d = new Date();
+  document.getElementById('f-date').value = d.toISOString().slice(0,10);
+  document.getElementById('f-year').value = d.getFullYear();
+  // period buttons
+  [['pbg-period',['上期','下期'],'f-period'],['pbg-type',['行動評価','目標達成度評価'],'f-type']].forEach(([gid,vals,hid])=>{
+    const g=document.getElementById(gid);
+    vals.forEach(v=>{ const b=document.createElement('button'); b.className='pb'; b.type='button'; b.textContent=v;
+      b.onclick=()=>{ g.querySelectorAll('.pb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); document.getElementById(hid).value=v; }; g.appendChild(b); });
+  });
+  // rank buttons
+  ['beh','goal','over'].forEach(id=>{
+    const g=document.getElementById('rg-'+id);
+    ['S','A','B','C','D'].forEach(r=>{ const b=document.createElement('button'); b.className='rb'; b.type='button'; b.textContent=r; b.dataset.r=r;
+      b.onclick=()=>{ g.querySelectorAll('.rb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); document.getElementById('f-r'+id).value=r; }; g.appendChild(b); });
+  });
+})();
+
+// ── STORAGE ──
+function loadRecords(){ try{ records=JSON.parse(localStorage.getItem(SK)||'[]'); }catch(e){ records=[]; } }
+function saveRecords(){ try{ localStorage.setItem(SK,JSON.stringify(records)); }catch(e){ showAlert('ストレージ容量不足。CSVを先にエクスポートしてください。','err'); } }
+
+// ── FORM ──
+function gv(id){ return (document.getElementById(id)||{}).value||''; }
+function getFormData(){
+  return { id:Date.now()+'_'+Math.random().toString(36).slice(2,5),
+    date:gv('f-date'), year:gv('f-year'), period:gv('f-period'), type:gv('f-type'),
+    dept:gv('f-dept').trim(), name:gv('f-name').trim(), evaluator:gv('f-evaluator').trim(),
+    rankBeh:gv('f-rbeh'), rankGoal:gv('f-rgoal'), rankOver:gv('f-rover'),
+    strength:gv('f-str').trim(), improve:gv('f-imp').trim(), next:gv('f-nxt').trim(),
+    questions:gv('f-q').trim(), signSelf:gv('f-ss').trim(), signEval:gv('f-se').trim(),
+    savedAt:new Date().toISOString() };
+}
+function validate(d){
+  if(!d.date) return '記入日を入力してください';
+  if(!d.year) return '対象年度を入力してください';
+  if(!d.period) return '対象期を選択してください';
+  if(!d.type) return '評価種別を選択してください';
+  if(!d.dept) return '部署名を入力してください';
+  if(!d.name) return '被評価者氏名を入力してください';
+  if(!d.evaluator) return '面談者氏名を入力してください';
+  if(!d.rankBeh) return '行動評価ランクを選択してください';
+  if(!d.rankGoal) return '目標達成度評価ランクを選択してください';
+  if(!d.rankOver) return '総合ランクを選択してください';
+  return null;
+}
+function showAlert(msg,type='ok'){
+  const el=document.getElementById('f-alert');
+  el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML='',5000);
+}
+function clearForm(){
+  ['f-dept','f-name','f-evaluator','f-str','f-imp','f-nxt','f-q','f-ss','f-se','f-period','f-type','f-rbeh','f-rgoal','f-rover'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.querySelectorAll('.rb,.pb').forEach(b=>b.classList.remove('on'));
+}
+
+// ── CSV SAVE (input side) ──
+function saveCSV(){
+  const d=getFormData(); const err=validate(d); if(err){ showAlert(err,'err'); return; }
+  downloadCSV([d],`feedback_${d.name}_${d.date}.csv`);
+  showAlert(`✅ CSVを保存しました。ファイルを人事部へ提出してください。`);
+}
+
+// ── CSV IMPORT (admin side) ──
+function importCSV(){
+  const files=document.getElementById('csv-import').files;
+  if(!files.length){ alert('ファイルを選択してください'); return; }
+  let done=0, added=0;
+  Array.from(files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const rows=parseCSV(e.target.result);
+      rows.forEach(r=>{ if(r.id&&!records.find(x=>x.id===r.id)){ records.push(r); added++; } });
+      done++;
+      if(done===files.length){
+        saveRecords(); filtered=[...records]; renderAdmin();
+        document.getElementById('import-msg').textContent=`✅ ${files.length}ファイルを読み込みました（新規追加 ${added}件）`;
+      }
+    };
+    reader.readAsText(file,'UTF-8');
+  });
+}
+
+function parseCSV(text){
+  const lines=text.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const headers=splitCSVRow(lines[0]);
+  return lines.slice(1).map(l=>{ const vals=splitCSVRow(l); const o={}; headers.forEach((h,i)=>o[h.trim()]=vals[i]||''); return o; });
+}
+function splitCSVRow(row){
+  const res=[]; let cur='', inQ=false;
+  for(let i=0;i<row.length;i++){
+    const c=row[i];
+    if(c==='"'){ if(inQ&&row[i+1]==='"'){ cur+='"'; i++; } else inQ=!inQ; }
+    else if(c===','&&!inQ){ res.push(cur); cur=''; }
+    else cur+=c;
+  }
+  res.push(cur); return res;
+}
+
+// ── ADMIN ──
+function renderAdmin(){
+  updateStats(); renderTable(); renderCharts();
+}
+function updateStats(){
+  const r=filtered;
+  document.getElementById('st-tot').textContent=r.length;
+  document.getElementById('st-dep').textContent=new Set(r.map(x=>x.dept)).size;
+  document.getElementById('st-s').textContent=r.filter(x=>x.rankOver==='S').length;
+  document.getElementById('st-a').textContent=r.filter(x=>x.rankOver==='A').length;
+  const yrs=[...new Set(r.map(x=>x.year))].filter(Boolean).sort();
+  document.getElementById('st-yr').textContent=yrs.length?yrs.join(','):'-';
+}
+function applyFilter(){
+  const yr=document.getElementById('fil-yr').value;
+  const per=document.getElementById('fil-per').value;
+  const dep=document.getElementById('fil-dep').value.trim();
+  const rnk=document.getElementById('fil-rnk').value;
+  const nm=document.getElementById('fil-nm').value.trim();
+  filtered=records.filter(r=>{
+    if(yr&&r.year!=yr) return false;
+    if(per&&r.period!==per) return false;
+    if(dep&&!r.dept.includes(dep)) return false;
+    if(rnk&&r.rankOver!==rnk) return false;
+    if(nm&&!r.name.includes(nm)) return false;
+    return true;
+  });
+  renderAdmin();
+}
+function resetFilter(){
+  ['fil-yr','fil-dep','fil-nm'].forEach(id=>document.getElementById(id).value='');
+  ['fil-per','fil-rnk'].forEach(id=>document.getElementById(id).value='');
+  filtered=[...records]; renderAdmin();
+}
+function renderTable(){
+  const tb=document.getElementById('tbl');
+  document.getElementById('pi').textContent=filtered.length+'件表示';
+  if(!filtered.length){ tb.innerHTML=`<tr><td colspan="9"><div class="empty">データがありません<br><small>CSVファイルをインポートしてください</small></div></td></tr>`; return; }
+  tb.innerHTML=filtered.map((r,i)=>`<tr>
+    <td>${r.date||''}</td><td>${r.year||''}/${r.period||''}</td><td>${r.dept||''}</td><td>${r.name||''}</td><td>${r.evaluator||''}</td>
+    <td><span class="badge b${r.rankBeh}">${r.rankBeh||''}</span></td>
+    <td><span class="badge b${r.rankGoal}">${r.rankGoal||''}</span></td>
+    <td><span class="badge b${r.rankOver}">${r.rankOver||''}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="showDetail(${i})">詳細</button>
+        <button class="btn btn-red btn-sm" style="margin-left:4px" onclick="delRec('${r.id}')">削除</button></td>
+  </tr>`).join('');
+}
+function renderCharts(){
+  const ranks=['S','A','B','C','D'], colors=['#6b46c1','#2b6cb0','#38a169','#d69e2e','#c53030'];
+  const cnt=ranks.map(r=>filtered.filter(x=>x.rankOver===r).length);
+  if(charts.r) charts.r.destroy();
+  charts.r=new Chart(document.getElementById('ch-rank'),{type:'doughnut',data:{labels:ranks,datasets:[{data:cnt,backgroundColor:colors,borderWidth:2}]},options:{plugins:{legend:{position:'right',labels:{font:{size:11}}}},maintainAspectRatio:true}});
+  const depts=[...new Set(filtered.map(r=>r.dept))].slice(0,10);
+  const dcnt=depts.map(d=>filtered.filter(r=>r.dept===d).length);
+  if(charts.d) charts.d.destroy();
+  charts.d=new Chart(document.getElementById('ch-dept'),{type:'bar',data:{labels:depts,datasets:[{data:dcnt,backgroundColor:'#90cdf4',borderRadius:5}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},maintainAspectRatio:true}});
+}
+function showDetail(i){
+  const r=filtered[i];
+  const dl=(l,v)=>`<dt>${l}</dt><dd>${v||'—'}</dd>`;
+  document.getElementById('modal-body').innerHTML=`
+    <h3 style="font-size:15px;font-weight:700;color:var(--blue);margin-bottom:4px">📋 詳細</h3>
+    <dl class="dl">
+    ${dl('記入日',r.date)}${dl('年度/期/種別',r.year+'年 '+r.period+' / '+r.type)}
+    ${dl('部署',r.dept)}${dl('被評価者',r.name)}${dl('面談者',r.evaluator)}
+    ${dl('行動評価',r.rankBeh)}${dl('目標達成度',r.rankGoal)}${dl('総合ランク',r.rankOver)}
+    ${dl('強み・高評価行動',r.strength)}${dl('改善点・不足視点',r.improve)}${dl('次期課題',r.next)}
+    ${dl('確認事項',r.questions)}${dl('被評価者署名',r.signSelf)}${dl('評価者署名',r.signEval)}
+    </dl>`;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function closeModal(){ document.getElementById('modal-bg').classList.remove('on'); }
+function delRec(id){ if(!confirm('削除しますか？')){ return; } records=records.filter(r=>r.id!==id); saveRecords(); filtered=[...records]; applyFilter(); }
+function clearAll(){ if(!confirm('全データを削除します。よろしいですか？')){ return; } records=[]; saveRecords(); filtered=[]; renderAdmin(); }
+
+// ── CSV EXPORT ──
+function exportCSV(){
+  if(!filtered.length){ alert('データがありません'); return; }
+  const hdrs=['id','date','year','period','type','dept','name','evaluator','rankBeh','rankGoal','rankOver','strength','improve','next','questions','signSelf','signEval','savedAt'];
+  const lbls=['ID','記入日','年度','期','評価種別','部署','被評価者','面談者','行動評価','目標達成度','総合ランク','強み','改善点','次期課題','確認事項','被評価者署名','評価者署名','保存日時'];
+  downloadCSV(filtered,'feedback_export_'+new Date().toISOString().slice(0,10)+'.csv',hdrs,lbls);
+}
+function downloadCSV(data,filename,hdrs,lbls){
+  if(!hdrs) hdrs=['id','date','year','period','type','dept','name','evaluator','rankBeh','rankGoal','rankOver','strength','improve','next','questions','signSelf','signEval','savedAt'];
+  if(!lbls) lbls=['ID','記入日','年度','期','評価種別','部署','被評価者','面談者','行動評価','目標達成度','総合ランク','強み','改善点','次期課題','確認事項','被評価者署名','評価者署名','保存日時'];
+  const q=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  const csv='\uFEFF'+[lbls.map(q).join(','),...data.map(r=>hdrs.map(h=>q(r[h])).join(','))].join('\r\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download=filename; a.click();
+}
+</script>
+</body>
+</html>
